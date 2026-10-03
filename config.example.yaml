@@ -1,0 +1,20 @@
+# Configuration non secrète. Les secrets vont dans .env.
+providers:
+  - id: local-ollama
+    type: ollama          # adapter: backend/app/providers/
+    model: llama3.1:8b
+    enabled: true
+    data_sensitivity: [public, internal, confidential]   # données autorisées
+  - id: cloud-free-tier
+    type: openai_compatible
+    model: example-model
+    enabled: false
+    data_sensitivity: [public]                            # jamais d'échantillon/log client
+
+agents:                    # tous désactivés par défaut (feature flags)
+  monitor: { enabled: true }
+  malware: { enabled: false }
+  forensics: { enabled: false }
+  network_detection: { enabled: false }
+  soc: { enabled: false }
+  threat_intel: { enabled: false }

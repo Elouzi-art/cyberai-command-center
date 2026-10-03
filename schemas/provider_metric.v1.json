@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cyberai.local/schemas/provider_metric.v1.json",
+  "title": "ProviderMetric v1 (R1 : jamais de valeur inventée)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["value", "available"],
+  "properties": {
+    "value": { "type": ["number", "string", "null"] },
+    "available": { "type": "boolean" }
+  },
+  "if": { "properties": { "available": { "const": false } } },
+  "then": { "properties": { "value": { "type": "null" } } },
+  "else": { "properties": { "value": { "not": { "type": "null" } } } }
+}

@@ -1,0 +1,1 @@
+{"subject":"sample.exe","agent":"malware","generated_at":"2026-10-03T10:00:00Z","needs_human_review":true,"items":[{"provenance":"tool_data","statement":"Section .text entropy 7.4","confidence":null,"source":"pefile"},{"provenance":"hypothesis","statement":"Probable packing","confidence":0.6}]}

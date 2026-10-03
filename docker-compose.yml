@@ -1,0 +1,19 @@
+services:
+  backend:
+    build: ./backend
+    env_file: [.env]
+    volumes: ["./config.example.yaml:/app/config.yaml:ro"]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    expose: ["8000"]
+  frontend:
+    build: ./frontend
+    ports: ["8080:8080"]   # exposer sur 127.0.0.1 en production derrière un reverse proxy TLS
+    depends_on: [backend]
+  ollama:                  # optionnel : docker compose --profile local-llm up
+    image: ollama/ollama:latest
+    profiles: [local-llm]
+    volumes: ["ollama:/root/.ollama"]
+volumes:
+  ollama:

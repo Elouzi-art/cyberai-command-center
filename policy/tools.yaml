@@ -1,0 +1,18 @@
+# Politique de risque. Le niveau est calculé ICI, jamais par le LLM (R5).
+# Outil inconnu => L4 (refusé). Aucun agent ne peut s'auto-approuver.
+default_level: L4
+levels:
+  L0: { approval: none,     description: "Lecture seule locale" }
+  L1: { approval: none,     description: "Enrichissement externe en liste blanche, jamais d'upload de fichier" }
+  L2: { approval: analyst,  description: "Actif : scan, détonation, requête vers hôte tiers" }
+  L3: { approval: senior,   description: "Impact : blocage, isolation, kill process", requires_rollback: true, max_ttl_minutes: 60 }
+  L4: { approval: forbidden, description: "Interdit aux agents" }
+tools:
+  file.parse_pe:           { level: L0 }
+  log.read:                { level: L0 }
+  intel.lookup_hash:       { level: L1, egress_allowlist: [virustotal.com] }
+  net.scan:                { level: L2 }
+  sandbox.detonate:        { level: L2 }
+  firewall.block_ip:       { level: L3, rollback: firewall.unblock_ip }
+  host.isolate:            { level: L3, rollback: host.release }
+  evidence.delete:         { level: L4 }

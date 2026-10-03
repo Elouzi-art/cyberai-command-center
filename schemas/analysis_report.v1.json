@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cyberai.local/schemas/analysis_report.v1.json",
+  "title": "AnalysisReport v1 (R4 : provenance obligatoire)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["subject", "agent", "generated_at", "items", "needs_human_review"],
+  "properties": {
+    "subject": { "type": "string" },
+    "agent": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
+    "needs_human_review": { "type": "boolean" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["provenance", "statement", "confidence"],
+        "properties": {
+          "provenance": { "enum": ["tool_data", "ml_result", "ai_observation", "hypothesis"] },
+          "statement": { "type": "string" },
+          "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
+          "evidence": { "type": "array", "items": { "type": "string" } },
+          "source": { "type": "string" },
+          "collected_at": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}

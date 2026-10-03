@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cyberai.local/schemas/approval_action.v1.json",
+  "title": "ApprovalAction v1 (R5, R9)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "agent", "tool", "params", "params_hash", "risk_level", "status", "expires_at"],
+  "properties": {
+    "id": { "type": "string" },
+    "agent": { "type": "string" },
+    "tool": { "type": "string" },
+    "params": { "type": "object" },
+    "params_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+    "risk_level": { "enum": ["L0", "L1", "L2", "L3", "L4"] },
+    "justification_ai": { "type": "string" },
+    "evidence": { "type": "array", "items": { "type": "string" } },
+    "blast_radius": { "type": "string" },
+    "rollback": { "type": ["string", "null"] },
+    "status": { "enum": ["pending", "approved", "rejected", "expired", "executed", "failed"] },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "approved_by": { "type": ["string", "null"] }
+  }
+}

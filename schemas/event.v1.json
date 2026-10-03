@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cyberai.local/schemas/event.v1.json",
+  "title": "UnifiedEvent v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "timestamp", "source", "agent", "type", "severity", "data", "confidence"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "source": { "type": "string" },
+    "agent": { "type": "string" },
+    "type": { "type": "string" },
+    "severity": { "enum": ["info", "low", "medium", "high", "critical"] },
+    "data": { "type": "object" },
+    "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 }
+  }
+}
