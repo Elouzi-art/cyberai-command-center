@@ -6,7 +6,7 @@ Méthode : sprints de 2 semaines (3–4 en solo), **un chemin vertical par sprin
 Repo, CI, schémas v1, squelette FastAPI + React TS strict, thème Cyberboard (tokens), `docker compose up`.
 
 ## Phase 1 — Observabilité (S1–S3) · MVP · R1 R2 R3 R8
-- S1 : auth + RBAC minimal, `AIProvider` (1 local Ollama + 1 cloud), journal de requêtes (tokens, latence, erreurs)
+- S1 ✅ : auth + RBAC minimal, `AIProvider` (1 local Ollama + 1 cloud), journal de requêtes (tokens, latence, erreurs)
 - S2 : tokens/min/h/jour, quotas et reset **seulement si exposés**, WebSocket, agent factice
 - S3 : dashboard Overview/Agents/Providers, état « N/A », `/health` `/metrics` `/usage`
 

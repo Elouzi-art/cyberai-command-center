@@ -1,17 +1,19 @@
-# Configuration non secrète. Les secrets vont dans .env.
+# Configuration non secrète. Les secrets vont dans .env (api_key_env nomme la variable).
 providers:
   - id: local-ollama
-    type: ollama          # adapter: backend/app/providers/
+    type: ollama                       # base_url optionnelle, sinon OLLAMA_BASE_URL
     model: llama3.1:8b
-    enabled: true
-    data_sensitivity: [public, internal, confidential]   # données autorisées
+    enabled: false                     # passer à true après `docker compose --profile local-llm up`
+    data_sensitivity: [public, internal, confidential]   # données autorisées pour ce provider
   - id: cloud-free-tier
-    type: openai_compatible
+    type: openai_compatible            # tout service exposant /chat/completions
     model: example-model
+    base_url: https://api.example.com/v1
+    api_key_env: CLOUD_PROVIDER_API_KEY
     enabled: false
-    data_sensitivity: [public]                            # jamais d'échantillon/log client
+    data_sensitivity: [public]         # jamais d'échantillon ni de log client
 
-agents:                    # tous désactivés par défaut (feature flags)
+agents:                                # tous désactivés par défaut (feature flags)
   monitor: { enabled: true }
   malware: { enabled: false }
   forensics: { enabled: false }

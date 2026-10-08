@@ -26,3 +26,12 @@ Flux secrets : `Frontend → Backend → Provider` (jamais de clé dans le navig
 Analyse de fichiers : conteneur sans réseau, lecture seule. Exécuteur d'actions : processus séparé, credentials éphémères. Les agents n'ont jamais les credentials d'exécution.
 
 Décisions : `docs/adr/`.
+
+## API (Sprint 1)
+| Route | Rôle min. | Rôle |
+|---|---|---|
+| `POST /auth/login`, `POST /auth/logout`, `GET /auth/me` | public / session | session cookie |
+| `GET /providers` | viewer | providers + métriques (jamais d'URL ni de clé) |
+| `POST /providers/{id}/complete` | analyst | appel IA ; refuse si la sensibilité des données n'est pas autorisée pour ce provider ; journalise tokens/latence |
+| `GET /usage` | viewer | agrégats ; tokens `null` si non exposés (R1) |
+| `GET /health`, `GET /metrics` | public | sondes |
