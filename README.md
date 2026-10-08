@@ -16,6 +16,10 @@ Les 10 invariants (R1–R10) sont dans [docs/INVARIANTS.md](docs/INVARIANTS.md).
 cp .env.example .env          # puis remplacer les placeholders
 docker compose up --build     # UI: http://localhost:8080  |  API: /api/health
 ```
+Premier utilisateur (aucun compte par défaut) :
+```bash
+docker compose run --rm backend python -m app.cli create-user admin admin
+```
 Développement local : `make test`, `make lint`. Détails dans [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Structure

@@ -1,3 +1,17 @@
-from app.providers.base import AIProvider, MetricValue, ProviderMetrics
+from app.providers.base import (
+    AIProvider,
+    CompletionResult,
+    MetricValue,
+    ProviderError,
+    ProviderMetrics,
+    RawResult,
+)
 
-__all__ = ["AIProvider", "MetricValue", "ProviderMetrics"]
+__all__ = [
+    "AIProvider",
+    "CompletionResult",
+    "MetricValue",
+    "ProviderError",
+    "ProviderMetrics",
+    "RawResult",
+]
