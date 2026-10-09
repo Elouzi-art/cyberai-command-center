@@ -35,3 +35,12 @@ Décisions : `docs/adr/`.
 | `POST /providers/{id}/complete` | analyst | appel IA ; refuse si la sensibilité des données n'est pas autorisée pour ce provider ; journalise tokens/latence |
 | `GET /usage` | viewer | agrégats ; tokens `null` si non exposés (R1) |
 | `GET /health`, `GET /metrics` | public | sondes |
+
+## API (Sprint 2)
+| Route | Rôle min. | Rôle |
+|---|---|---|
+| `GET /events?limit&type` | viewer | derniers événements (tampon en mémoire) |
+| `WS /ws/events?replay=N` | viewer | flux temps réel ; Origin vérifié, session revalidée périodiquement |
+| `GET /usage/tokens?by=agent\|model\|provider` | viewer | fenêtres 1 min / 1 h / 24 h + ventilation |
+| `GET /providers` | viewer | ajoute `quota` (restant, limite, % utilisé, reset, secondes restantes) |
+| `GET /agents`, `POST /agents/demo/run` | viewer / analyst | agent de démonstration (désactivé par défaut) |

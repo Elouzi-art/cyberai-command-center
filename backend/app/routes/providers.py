@@ -8,7 +8,8 @@ from pydantic import BaseModel, Field
 from app.audit import audit
 from app.deps import DbDep, csrf_guard, require_role
 from app.models import RequestLog, User
-from app.providers import ProviderError
+from app.monitor import check_quota
+from app.providers import CompletionResult, ProviderError
 
 router = APIRouter(prefix="/providers", tags=["providers"])
 Viewer = Annotated[User, Depends(require_role("viewer"))]
@@ -31,6 +32,7 @@ def list_providers(request: Request, _user: Viewer) -> list[dict[str, object]]:
             "model": p.model,
             "data_sensitivity": list(p.data_sensitivity),
             "metrics": p.metrics().model_dump(),
+            "quota": p.quota().model_dump(),
         }
         for p in request.app.state.providers.values()
     ]
@@ -66,6 +68,18 @@ async def complete(
             )
         )
         db.commit()
+        request.app.state.bus.publish(
+            source="api",
+            agent=body.agent,
+            type="api.error",
+            severity="medium",
+            data={
+                "provider": provider.id,
+                "model": provider.model,
+                "error_type": exc.error_type,
+                "latency_ms": exc.latency_ms,
+            },
+        )
         raise HTTPException(status_code=502, detail="erreur du fournisseur") from None
     db.add(
         RequestLog(
@@ -88,6 +102,7 @@ async def complete(
         agent=body.agent,
         sensitivity=body.sensitivity,
     )  # jamais le prompt
+    _emit_success_events(request, provider.id, body.agent, result)
     return {
         "text": result.text,
         "provider": result.provider,
@@ -102,3 +117,46 @@ async def complete(
             "available": result.output_tokens is not None,
         },
     }
+
+
+def _emit_success_events(
+    request: Request, provider_id: str, agent: str, result: CompletionResult
+) -> None:
+    app = request.app
+    bus = app.state.bus
+    bus.publish(
+        source="api",
+        agent=agent,
+        type="api.request",
+        data={
+            "provider": provider_id,
+            "model": result.model,
+            "latency_ms": result.latency_ms,
+            "status": "success",
+        },
+    )
+    bus.publish(
+        source="api",
+        agent=agent,
+        type="token.usage",
+        data={
+            "provider": provider_id,
+            "model": result.model,
+            "input_tokens": {
+                "value": result.input_tokens,
+                "available": result.input_tokens is not None,
+            },
+            "output_tokens": {
+                "value": result.output_tokens,
+                "available": result.output_tokens is not None,
+            },
+        },
+    )
+    s = app.state.settings
+    check_quota(
+        app.state.providers[provider_id],
+        bus,
+        app.state.quota_alerts,
+        s.quota_warn_pct,
+        s.quota_critical_pct,
+    )

@@ -1,23 +1,24 @@
 from __future__ import annotations
 
+import asyncio
 import logging
 import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
-from typing import Annotated
 
-from fastapi import Depends, FastAPI
+from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
+from app.agents.demo import AGENT_ID, AgentState
 from app.config import Settings
 from app.db import init_db, make_engine, make_session_factory
-from app.deps import require_role
+from app.events import EventBus
 from app.limiter import LoginLimiter
-from app.models import User
+from app.monitor import QuotaAlertState
 from app.providers import AIProvider
 from app.providers.registry import load_providers
-from app.routes import auth, providers, usage
+from app.routes import agents, auth, events, providers, usage
 
 log = logging.getLogger(__name__)
 
@@ -41,19 +42,25 @@ def create_app(
             else load_providers(cfg.config_path, os.environ)
         )
         yield
+        for t in list(app.state.tasks):
+            t.cancel()
         for p in app.state.providers.values():
             await p.aclose()
         engine.dispose()
 
     app = FastAPI(
         title="CyberAI Command Center",
-        version="0.2.0",
+        version="0.3.0",
         docs_url=None,
         redoc_url=None,
         lifespan=lifespan,
     )
     app.state.settings = cfg
     app.state.limiter = LoginLimiter(cfg.login_max_failures, cfg.login_window_seconds)
+    app.state.bus = EventBus(cfg.event_buffer)
+    app.state.quota_alerts = QuotaAlertState()
+    app.state.demo_state = AgentState(AGENT_ID)
+    app.state.tasks = set[asyncio.Task[None]]()
 
     @app.get("/health")
     def health() -> dict[str, str]:
@@ -63,13 +70,11 @@ def create_app(
     def metrics() -> PlainTextResponse:
         return PlainTextResponse(generate_latest().decode(), media_type=CONTENT_TYPE_LATEST)
 
-    @app.get("/agents")
-    def agents(_user: Annotated[User, Depends(require_role("viewer"))]) -> list[dict[str, str]]:
-        return []  # Sprint 2+ : Agent Manager
-
     app.include_router(auth.router)
     app.include_router(providers.router)
     app.include_router(usage.router)
+    app.include_router(agents.router)
+    app.include_router(events.router)
     return app
 
 
