@@ -1,0 +1,73 @@
+/** Miroir des réponses du backend. Toute métrique non exposée vaut {value: null, available: false} (R1). */
+import type { MetricValue } from "./metric";
+
+export interface Quota {
+  unit: MetricValue;
+  remaining: MetricValue;
+  limit: MetricValue;
+  used_pct: MetricValue;
+  reset_at: MetricValue;
+  reset_in_seconds: MetricValue;
+}
+
+export interface ProviderMetrics {
+  model: MetricValue;
+  requests: MetricValue;
+  tokens: MetricValue;
+  latency_ms: MetricValue;
+  errors: MetricValue;
+  rate_limit: MetricValue;
+  quota_remaining: MetricValue;
+  reset_time: MetricValue;
+  cost: MetricValue;
+  health: MetricValue;
+}
+
+export interface Provider {
+  id: string;
+  model: string;
+  data_sensitivity: string[];
+  metrics: ProviderMetrics;
+  quota: Quota;
+}
+
+export interface Agent {
+  id: string;
+  simulated: boolean;
+  status: "running" | "idle";
+  tasks_running: number;
+  tasks_completed: number;
+  tasks_failed: number;
+  last_activity: MetricValue;
+}
+
+export interface TokenWindow {
+  requests: number;
+  errors: number;
+  tokens: MetricValue;
+  avg_tokens_per_request: MetricValue;
+}
+
+export type WindowName = "1m" | "1h" | "24h";
+export interface UsageTokens {
+  windows: Record<WindowName, TokenWindow>;
+}
+
+export type Severity = "info" | "low" | "medium" | "high" | "critical";
+/** schemas/event.v1.json */
+export interface UnifiedEvent {
+  id: string;
+  timestamp: string;
+  source: string;
+  agent: string;
+  type: string;
+  severity: Severity;
+  data: Record<string, unknown>;
+  confidence: number | null;
+}
+
+export type Role = "viewer" | "analyst" | "admin";
+export interface Me {
+  username: string;
+  role: Role;
+}

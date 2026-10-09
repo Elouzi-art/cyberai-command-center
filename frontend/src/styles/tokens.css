@@ -10,7 +10,3 @@
 }
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: var(--font-ui); background: var(--bg-base); color: var(--text-primary); line-height: 1.6; }
-.cb-card { background: var(--bg-surface); border: 1px solid var(--bg-border); border-radius: var(--r-lg); padding: 18px; }
-.cb-stat-label { font-size: 12px; color: var(--text-muted); }
-.cb-stat-value { font-family: var(--font-mono); font-size: 28px; font-weight: 700; }
-.cb-na { color: var(--text-muted); font-family: var(--font-mono); border: 1px dashed var(--bg-border); border-radius: var(--r-sm); padding: 2px 8px; }
