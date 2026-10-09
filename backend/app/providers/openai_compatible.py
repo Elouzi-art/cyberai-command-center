@@ -6,6 +6,8 @@ from app.providers.base import AIProvider, RawResult, parse_int
 
 # En-têtes de limite exposés par certains fournisseurs ; absents => métrique indisponible (R1).
 _RATE_HEADERS = {
+    "x-ratelimit-limit-requests": "limit_requests",
+    "x-ratelimit-limit-tokens": "limit_tokens",
     "x-ratelimit-remaining-requests": "remaining_requests",
     "x-ratelimit-remaining-tokens": "remaining_tokens",
     "x-ratelimit-reset-requests": "reset_requests",

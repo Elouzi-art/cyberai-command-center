@@ -16,6 +16,12 @@ class Settings:
     session_ttl_minutes: int = 480
     login_max_failures: int = 5
     login_window_seconds: int = 300
+    event_buffer: int = 1000
+    ws_recheck_seconds: float = 30.0
+    quota_warn_pct: float = 80.0
+    quota_critical_pct: float = 95.0
+    demo_agent_enabled: bool = False
+    demo_step_delay: float = 0.5
 
     @classmethod
     def from_env(cls, env: Mapping[str, str] | None = None) -> Settings:
@@ -26,4 +32,5 @@ class Settings:
             config_path=e.get("CONFIG_PATH", cls.config_path),
             allowed_origins=origins or cls.allowed_origins,
             cookie_secure=e.get("COOKIE_SECURE", "true").lower() != "false",
+            demo_agent_enabled=e.get("DEMO_AGENT", "false").lower() == "true",
         )

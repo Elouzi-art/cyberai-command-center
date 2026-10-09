@@ -20,20 +20,24 @@ def get_db(request: Request) -> Iterator[Session]:
 DbDep = Annotated[Session, Depends(get_db)]
 
 
-def current_user(request: Request, db: DbDep) -> User:
-    token = request.cookies.get(COOKIE)
+def user_from_token(db: Session, token: str | None) -> User | None:
+    """Résout un jeton de session en utilisateur (HTTP et WebSocket partagent cette logique)."""
     if not token:
-        raise HTTPException(status_code=401, detail="authentification requise")
+        return None
     row = db.get(SessionRow, hash_token(token))
     if row is None:
-        raise HTTPException(status_code=401, detail="session invalide")
+        return None
     if row.expires_at < utcnow():
         db.delete(row)
         db.commit()
-        raise HTTPException(status_code=401, detail="session expirée")
-    user = db.get(User, row.user_id)
+        return None
+    return db.get(User, row.user_id)
+
+
+def current_user(request: Request, db: DbDep) -> User:
+    user = user_from_token(db, request.cookies.get(COOKIE))
     if user is None:
-        raise HTTPException(status_code=401, detail="session invalide")
+        raise HTTPException(status_code=401, detail="authentification requise")
     return user
 
 

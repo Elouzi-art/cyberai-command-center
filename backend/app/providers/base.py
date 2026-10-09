@@ -5,9 +5,12 @@ from __future__ import annotations
 import time
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
 from pydantic import BaseModel, model_validator
+
+if TYPE_CHECKING:
+    from app.providers.quota import QuotaStatus
 
 
 class MetricValue(BaseModel):
@@ -94,6 +97,7 @@ class _Stats:
     tokens_complete: bool = True
     last_ok: bool | None = None
     last_headers: dict[str, str] = field(default_factory=dict)
+    observed_at: float | None = None
 
 
 def _header_metric(headers: dict[str, str], key: str) -> MetricValue:
@@ -137,6 +141,7 @@ class AIProvider(ABC):
         self._stats.latency_sum_ms += latency
         self._stats.last_ok = True
         self._stats.last_headers = raw.headers
+        self._stats.observed_at = time.time()
         if raw.input_tokens is None or raw.output_tokens is None:
             self._stats.tokens_complete = False
         else:
@@ -149,6 +154,11 @@ class AIProvider(ABC):
             output_tokens=raw.output_tokens,
             latency_ms=latency,
         )
+
+    def quota(self, now: float | None = None) -> QuotaStatus:
+        from app.providers.quota import build_quota
+
+        return build_quota(self._stats.last_headers, self._stats.observed_at, now)
 
     def metrics(self) -> ProviderMetrics:
         """Mesures réelles uniquement. Tout ce qui n'est pas exposé reste `unavailable()` (R1)."""

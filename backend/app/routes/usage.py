@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy import case, func, select
 
 from app.deps import DbDep, require_role
-from app.models import RequestLog, User
+from app.models import RequestLog, User, utcnow
+from app.usage_stats import Dimension, token_breakdown, token_windows
 
 router = APIRouter(tags=["usage"])
 Viewer = Annotated[User, Depends(require_role("viewer"))]
@@ -47,3 +48,18 @@ def usage(db: DbDep, _user: Viewer) -> list[dict[str, object]]:
             }
         )
     return out
+
+
+@router.get("/usage/tokens")
+def usage_tokens(
+    db: DbDep, _user: Viewer, by: Annotated[Dimension | None, Query()] = None
+) -> dict[str, Any]:
+    """Fenêtres 1 min / 1 h / 24 h et ventilation (24 h) par agent, modèle ou provider.
+
+    Les agents de démonstration (chiffres simulés) ne sont pas dans `request_log`, donc exclus (R1).
+    """
+    now = utcnow()
+    return {
+        "windows": token_windows(db, now),
+        "breakdown": token_breakdown(db, now, by) if by else [],
+    }
