@@ -55,3 +55,29 @@ class AuditLog(Base):
     actor: Mapped[str] = mapped_column(String(64))
     action: Mapped[str] = mapped_column(String(64))
     detail: Mapped[str] = mapped_column(Text, default="{}")
+
+
+class Action(Base):
+    """Action proposée. Les paramètres sont immuables : modifier = rejeter et re-proposer."""
+
+    __tablename__ = "actions"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
+    requested_by: Mapped[str] = mapped_column(String(64))
+    requester_kind: Mapped[str] = mapped_column(String(8))  # agent | human
+    agent: Mapped[str] = mapped_column(String(64))
+    tool: Mapped[str] = mapped_column(String(64))
+    params_json: Mapped[str] = mapped_column(Text)
+    params_hash: Mapped[str] = mapped_column(String(80))
+    risk_level: Mapped[str] = mapped_column(String(2))
+    required_role: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    justification_ai: Mapped[str | None] = mapped_column(Text, nullable=True)
+    evidence_json: Mapped[str] = mapped_column(Text, default="[]")
+    blast_radius: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    rollback: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    status: Mapped[str] = mapped_column(String(16), index=True)
+    expires_at: Mapped[datetime] = mapped_column(DateTime)
+    decided_by: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    executed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    result_json: Mapped[str | None] = mapped_column(Text, nullable=True)

@@ -43,6 +43,14 @@ export function describeEvent(type: string, data: Record<string, unknown>): stri
       const reset = typeof left === "number" ? ` · reset dans ${formatDuration(left)}` : "";
       return `${str(data["provider"])} · ${str(data["used_pct"])} % utilisé${reset}`;
     }
+    case "action.proposed":
+    case "action.approved":
+    case "action.rejected":
+    case "action.expired":
+    case "action.executed":
+    case "action.failed":
+    case "action.refused":
+      return `${str(data["tool"])} · ${str(data["risk_level"])}`;
     case "agent.started":
     case "agent.completed":
     case "agent.failed":

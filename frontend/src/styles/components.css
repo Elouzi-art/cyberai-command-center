@@ -88,3 +88,16 @@
   .cb-main { margin-left: 0; }
   .cb-card { overflow-x: auto; }
 }
+.cb-nav-badge { float: right; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 10px;
+  font-family: var(--font-mono); background: var(--orange); color: var(--bg-base); }
+.cb-stack { display: grid; gap: 16px; }
+.cb-subtitle { font-size: 11px; color: var(--text-muted); letter-spacing: 1.5px; text-transform: uppercase;
+  font-family: var(--font-mono); margin: 14px 0 6px; }
+.cb-pre { background: #010409; border: 1px solid var(--bg-border); border-radius: var(--r-md); padding: 12px;
+  font-family: var(--font-mono); font-size: 12px; color: var(--accent); overflow-x: auto; white-space: pre-wrap;
+  word-break: break-all; }
+.cb-quote { border-left: 2px solid var(--purple); padding: 6px 12px; color: var(--text-secondary); font-size: 13px;
+  margin-bottom: 12px; }
+.cb-notice { border: 1px solid var(--bg-border); border-left: 3px solid var(--accent); border-radius: var(--r-md);
+  background: var(--bg-surface); padding: 10px 14px; font-size: 13px; margin-bottom: 12px; }
+.cb-action { border-left: 3px solid var(--orange); }

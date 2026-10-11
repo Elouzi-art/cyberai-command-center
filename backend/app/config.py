@@ -21,6 +21,9 @@ class Settings:
     quota_warn_pct: float = 80.0
     quota_critical_pct: float = 95.0
     demo_agent_enabled: bool = False
+    policy_path: str = "policy/tools.yaml"
+    approval_ttl_minutes: int = 60
+    allow_self_approval: bool = False
     demo_step_delay: float = 0.5
 
     @classmethod
@@ -33,4 +36,7 @@ class Settings:
             allowed_origins=origins or cls.allowed_origins,
             cookie_secure=e.get("COOKIE_SECURE", "true").lower() != "false",
             demo_agent_enabled=e.get("DEMO_AGENT", "false").lower() == "true",
+            policy_path=e.get("POLICY_PATH", cls.policy_path),
+            approval_ttl_minutes=int(e.get("APPROVAL_TTL_MINUTES", cls.approval_ttl_minutes)),
+            allow_self_approval=e.get("ALLOW_SELF_APPROVAL", "false").lower() == "true",
         )

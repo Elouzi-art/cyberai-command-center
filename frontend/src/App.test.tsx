@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import App from "./App";
-import { demoAgent, evt, silentProvider } from "./test-fixtures";
+import { action, demoAgent, evt, silentProvider } from "./test-fixtures";
 
 class FakeWS {
   static all: FakeWS[] = [];
@@ -19,7 +19,7 @@ const ws0 = (): FakeWS => {
   return w;
 };
 
-type Routes = Record<string, (init?: RequestInit) => Response | Promise<Response>>;
+type Routes = Record<string, (init?: RequestInit, url?: string) => Response | Promise<Response>>;
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 const usage = {
@@ -33,8 +33,8 @@ const usage = {
 
 function stub(routes: Routes) {
   vi.stubGlobal("fetch", vi.fn((url: string, init?: RequestInit) => {
-    const handler = routes[url.replace(/^\/api/, "")];
-    return Promise.resolve(handler ? handler(init) : json({}, 404));
+    const handler = routes[url.replace(/^\/api/, "").split("?")[0] ?? ""];
+    return Promise.resolve(handler ? handler(init, url) : json({}, 404));
   }));
 }
 const base = (role: string): Routes => ({
@@ -43,6 +43,7 @@ const base = (role: string): Routes => ({
   "/providers": () => json([]),
   "/usage/tokens": () => json(usage),
   "/auth/logout": () => json({ status: "ok" }),
+  "/actions": () => json([]),
 });
 
 beforeEach(() => {
@@ -140,4 +141,21 @@ test("déconnexion", async () => {
   render(<App />);
   fireEvent.click(await screen.findByRole("button", { name: "Déconnexion" }));
   expect(await screen.findByLabelText("Utilisateur")).toBeTruthy();
+});
+
+test("badge Approvals : nombre d'actions en attente, visible pour un analyste", async () => {
+  stub({ ...base("analyst"), "/actions": () => json([action(), action({ id: "act_2" })]) });
+  render(<App />);
+  expect((await screen.findByLabelText("2 en attente")).textContent).toBe("2");
+  expect(screen.getByRole("link", { name: /Approvals/ })).toBeTruthy();
+});
+
+test("un viewer n'a ni l'onglet Approvals ni accès à la file", async () => {
+  window.location.hash = "#/approvals";
+  stub(base("viewer"));
+  render(<App />);
+  await screen.findByText("Agents actifs");
+  expect(screen.queryByRole("link", { name: /Approvals/ })).toBeNull();
+  const calls = (fetch as unknown as { mock: { calls: string[][] } }).mock.calls.map((c) => c[0] ?? "");
+  expect(calls.some((u) => u.includes("/actions"))).toBe(false);
 });

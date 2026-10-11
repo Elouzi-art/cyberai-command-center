@@ -44,3 +44,13 @@ Décisions : `docs/adr/`.
 | `GET /usage/tokens?by=agent\|model\|provider` | viewer | fenêtres 1 min / 1 h / 24 h + ventilation |
 | `GET /providers` | viewer | ajoute `quota` (restant, limite, % utilisé, reset, secondes restantes) |
 | `GET /agents`, `POST /agents/demo/run` | viewer / analyst | agent de démonstration (désactivé par défaut) |
+
+## API (Sprint 4) : voir docs/APPROVALS.md
+| Route | Rôle min. | Rôle |
+|---|---|---|
+| `GET /policy` | viewer | outils et niveaux |
+| `POST /actions` | analyst | proposer une action (le niveau vient de la politique) |
+| `GET /actions?status=`, `GET /actions/{id}` | analyst | file et détail |
+| `POST /actions/{id}/approve` | selon le niveau (analyst L2, admin L3) | approuve le hash vu ; `dry_run` possible |
+| `POST /actions/{id}/reject` | analyst | rejette |
+| `POST /agents/demo/propose` | analyst | l'agent de démonstration propose une action (si activé) |

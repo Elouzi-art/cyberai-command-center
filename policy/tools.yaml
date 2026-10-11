@@ -1,5 +1,6 @@
 # Politique de risque. Le niveau est calculé ICI, jamais par le LLM (R5).
 # Outil inconnu => L4 (refusé). Aucun agent ne peut s'auto-approuver.
+# Le chargement échoue (fail closed) si une règle est affaiblie : voir backend/app/policy.py.
 default_level: L4
 levels:
   L0: { approval: none,     description: "Lecture seule locale" }
@@ -15,4 +16,6 @@ tools:
   sandbox.detonate:        { level: L2 }
   firewall.block_ip:       { level: L3, rollback: firewall.unblock_ip }
   host.isolate:            { level: L3, rollback: host.release }
+  firewall.unblock_ip:     { level: L2 }   # rollback de firewall.block_ip
+  host.release:            { level: L2 }   # rollback de host.isolate
   evidence.delete:         { level: L4 }

@@ -4,20 +4,127 @@
   "title": "ApprovalAction v1 (R5, R9)",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "agent", "tool", "params", "params_hash", "risk_level", "status", "expires_at"],
+  "required": [
+    "id",
+    "agent",
+    "tool",
+    "params",
+    "params_hash",
+    "risk_level",
+    "status",
+    "expires_at",
+    "requested_by",
+    "requester_kind"
+  ],
   "properties": {
-    "id": { "type": "string" },
-    "agent": { "type": "string" },
-    "tool": { "type": "string" },
-    "params": { "type": "object" },
-    "params_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
-    "risk_level": { "enum": ["L0", "L1", "L2", "L3", "L4"] },
-    "justification_ai": { "type": "string" },
-    "evidence": { "type": "array", "items": { "type": "string" } },
-    "blast_radius": { "type": "string" },
-    "rollback": { "type": ["string", "null"] },
-    "status": { "enum": ["pending", "approved", "rejected", "expired", "executed", "failed"] },
-    "expires_at": { "type": "string", "format": "date-time" },
-    "approved_by": { "type": ["string", "null"] }
+    "id": {
+      "type": "string"
+    },
+    "agent": {
+      "type": "string"
+    },
+    "tool": {
+      "type": "string"
+    },
+    "params": {
+      "type": "object"
+    },
+    "params_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "risk_level": {
+      "enum": [
+        "L0",
+        "L1",
+        "L2",
+        "L3",
+        "L4"
+      ]
+    },
+    "justification_ai": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blast_radius": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "rollback": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "status": {
+      "enum": [
+        "pending",
+        "approved",
+        "rejected",
+        "expired",
+        "executed",
+        "failed"
+      ]
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "required_role": {
+      "enum": [
+        "analyst",
+        "admin",
+        null
+      ]
+    },
+    "created_at": {
+      "type": "string"
+    },
+    "requested_by": {
+      "type": "string"
+    },
+    "requester_kind": {
+      "enum": [
+        "agent",
+        "human"
+      ]
+    },
+    "decided_by": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "decided_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "executed_at": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "result": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "dry_run_result": {
+      "type": "object"
+    }
   }
 }

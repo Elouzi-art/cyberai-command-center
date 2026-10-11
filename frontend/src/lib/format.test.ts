@@ -30,3 +30,8 @@ test("describeEvent n'affiche le reset que s'il est fourni", () => {
 test("describeEvent tolère des données inattendues sans planter", () => {
   expect(describeEvent("api.error", { provider: { x: 1 } })).toBe("? · ?");
 });
+
+test("describeEvent : événements d'action sans exposer les paramètres", () => {
+  const txt = describeEvent("action.proposed", { tool: "net.scan", risk_level: "L2", params: { secret: "x" } });
+  expect(txt).toBe("net.scan · L2");
+});

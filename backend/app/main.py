@@ -14,11 +14,13 @@ from app.agents.demo import AGENT_ID, AgentState
 from app.config import Settings
 from app.db import init_db, make_engine, make_session_factory
 from app.events import EventBus
+from app.executor import Executor
 from app.limiter import LoginLimiter
 from app.monitor import QuotaAlertState
+from app.policy import Policy
 from app.providers import AIProvider
 from app.providers.registry import load_providers
-from app.routes import agents, auth, events, providers, usage
+from app.routes import actions, agents, auth, events, providers, usage
 
 log = logging.getLogger(__name__)
 
@@ -35,6 +37,10 @@ def create_app(
             os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
         engine = make_engine(cfg.database_url)
         init_db(engine)
+        app.state.policy = Policy.load(
+            cfg.policy_path
+        )  # échec fermé : pas de politique, pas de démarrage
+        app.state.executor = Executor.stub_for(list(app.state.policy.tools()))
         app.state.session_factory = make_session_factory(engine)
         app.state.providers = (
             provider_overrides
@@ -50,7 +56,7 @@ def create_app(
 
     app = FastAPI(
         title="CyberAI Command Center",
-        version="0.3.0",
+        version="0.4.0",
         docs_url=None,
         redoc_url=None,
         lifespan=lifespan,
@@ -75,6 +81,7 @@ def create_app(
     app.include_router(usage.router)
     app.include_router(agents.router)
     app.include_router(events.router)
+    app.include_router(actions.router)
     return app
 
 
