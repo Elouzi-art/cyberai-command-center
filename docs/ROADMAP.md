@@ -8,7 +8,7 @@ Repo, CI, schémas v1, squelette FastAPI + React TS strict, thème Cyberboard (t
 ## Phase 1 — Observabilité (S1–S3) · MVP · R1 R2 R3 R8
 - S1 ✅ : auth + RBAC minimal, `AIProvider` (1 local Ollama + 1 cloud), journal de requêtes (tokens, latence, erreurs)
 - S2 ✅ : tokens/min/h/jour, quotas et reset **seulement si exposés**, WebSocket, agent factice
-- S3 : dashboard Overview/Agents/Providers, état « N/A », `/health` `/metrics` `/usage`
+- S3 ✅ : dashboard Overview/Agents/Providers, état « N/A », `/health` `/metrics` `/usage`
 
 ## Phase 2 — Garde-fou (S4–S5) · R5 R9
 Moteur de politique (L0–L4), file d'approbation (hash des paramètres, expiration), exécuteur séparé (stub), audit log, page Approvals.
