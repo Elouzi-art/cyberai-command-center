@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterator
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -11,6 +12,7 @@ from app.models import User
 from app.providers import AIProvider, RawResult
 from app.security import hash_password
 
+POLICY = str(Path(__file__).resolve().parents[2] / "policy" / "tools.yaml")
 PASSWORD = "correct-horse-battery"
 
 
@@ -30,7 +32,9 @@ def make_client() -> Iterator[Callable[..., TestClient]]:
     clients: list[TestClient] = []
 
     def _make(providers: dict[str, AIProvider] | None = None, **overrides: object) -> TestClient:
-        settings = Settings(database_url="sqlite://", cookie_secure=False, **overrides)  # type: ignore[arg-type]
+        settings = Settings(
+            database_url="sqlite://", cookie_secure=False, policy_path=POLICY, **overrides
+        )  # type: ignore[arg-type]
         client = TestClient(create_app(settings, providers if providers is not None else {}))
         client.__enter__()
         clients.append(client)

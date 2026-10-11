@@ -4,7 +4,7 @@ from fastapi.testclient import TestClient
 
 from app.config import Settings
 from app.main import create_app
-from tests.conftest import PASSWORD, login
+from tests.conftest import PASSWORD, POLICY, login
 
 
 def test_login_ok_sets_hardened_cookie(make_client: Callable[..., TestClient]) -> None:
@@ -17,7 +17,7 @@ def test_login_ok_sets_hardened_cookie(make_client: Callable[..., TestClient]) -
 
 
 def test_secure_flag_by_default() -> None:
-    with TestClient(create_app(Settings(database_url="sqlite://"))) as c:
+    with TestClient(create_app(Settings(database_url="sqlite://", policy_path=POLICY))) as c:
         with c.app.state.session_factory() as db:  # type: ignore[attr-defined]
             from app.models import User
             from app.security import hash_password

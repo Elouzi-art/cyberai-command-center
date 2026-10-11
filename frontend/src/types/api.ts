@@ -71,3 +71,30 @@ export interface Me {
   username: string;
   role: Role;
 }
+
+export type RiskLevel = "L0" | "L1" | "L2" | "L3" | "L4";
+export type ActionStatus = "pending" | "approved" | "rejected" | "expired" | "executed" | "failed";
+/** schemas/approval_action.v1.json */
+export interface Action {
+  id: string;
+  agent: string;
+  tool: string;
+  params: Record<string, unknown>;
+  params_hash: string;
+  risk_level: RiskLevel;
+  required_role: "analyst" | "admin" | null;
+  justification_ai: string | null;
+  evidence: string[];
+  blast_radius: string | null;
+  rollback: string | null;
+  status: ActionStatus;
+  created_at: string;
+  expires_at: string;
+  requested_by: string;
+  requester_kind: "agent" | "human";
+  decided_by: string | null;
+  decided_at: string | null;
+  executed_at: string | null;
+  result: Record<string, unknown> | null;
+  dry_run_result?: Record<string, unknown>;
+}

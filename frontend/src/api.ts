@@ -1,4 +1,4 @@
-import type { Agent, Me, Provider, UsageTokens } from "./types/api";
+import type { Action, ActionStatus, Agent, Me, Provider, UsageTokens } from "./types/api";
 
 export class ApiError extends Error {
   constructor(public readonly status: number) {
@@ -26,5 +26,10 @@ export const api = {
   providers: () => request<Provider[]>("/providers"),
   agents: () => request<Agent[]>("/agents"),
   usageTokens: () => request<UsageTokens>("/usage/tokens"),
+  actions: (status?: ActionStatus) => request<Action[]>(`/actions${status ? `?status=${status}` : ""}`),
+  approve: (id: string, paramsHash: string, dryRun: boolean) =>
+    post<Action>(`/actions/${encodeURIComponent(id)}/approve`, { params_hash: paramsHash, dry_run: dryRun }),
+  reject: (id: string) => post<Action>(`/actions/${encodeURIComponent(id)}/reject`, {}),
+  proposeDemo: (tool: string) => post<Action>("/agents/demo/propose", { tool }),
   runDemo: (fail: boolean) => post<{ status: string }>("/agents/demo/run", { fail }),
 };

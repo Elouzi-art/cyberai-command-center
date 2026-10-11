@@ -11,6 +11,7 @@ Repo, CI, schémas v1, squelette FastAPI + React TS strict, thème Cyberboard (t
 - S3 ✅ : dashboard Overview/Agents/Providers, état « N/A », `/health` `/metrics` `/usage`
 
 ## Phase 2 — Garde-fou (S4–S5) · R5 R9
+S4 ✅ moteur de politique + file d'approbation + exécuteur factice + page Approvals. S5 : exécuteur séparé (processus, identifiants éphémères) — à planifier.
 Moteur de politique (L0–L4), file d'approbation (hash des paramètres, expiration), exécuteur séparé (stub), audit log, page Approvals.
 
 ## Phase 3 — Malware (S6–S8) · R4 R6 R7

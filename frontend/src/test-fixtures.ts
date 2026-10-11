@@ -26,3 +26,14 @@ export const evt = (over: Record<string, unknown> = {}) =>
     id: "e1", timestamp: "2026-10-10T10:00:00.000Z", source: "api", agent: "a", type: "api.request",
     severity: "info", data: { provider: "p", model: "m", latency_ms: 12 }, confidence: null, ...over,
   });
+
+import type { Action } from "./types/api";
+
+export const HASH = `sha256:${"a".repeat(64)}`;
+export const action = (over: Partial<Action> = {}): Action => ({
+  id: "act_1", agent: "demo", tool: "net.scan", params: { target: "198.51.100.1" }, params_hash: HASH,
+  risk_level: "L2", required_role: "analyst", justification_ai: "Scan de routine proposé par l'agent.",
+  evidence: ["evt_1"], blast_radius: "aucun", rollback: null, status: "pending",
+  created_at: "2026-10-10T10:00:00Z", expires_at: "2099-01-01T00:00:00Z", requested_by: "agent:demo",
+  requester_kind: "agent", decided_by: null, decided_at: null, executed_at: null, result: null, ...over,
+});

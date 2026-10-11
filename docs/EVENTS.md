@@ -10,6 +10,10 @@ Les `data` ne contiennent jamais de prompt, de secret ni de contenu de fichier. 
 | `api.error` | appel provider échoué | medium | `provider`, `model`, `error_type`, `latency_ms` |
 | `rate_limit.warning` | quota ≥ 80 % (medium) ou ≥ 95 % (high) | medium / high | `provider`, `used_pct`, + `unit`, `remaining`, `reset_at`, `remaining_time` **si exposés** |
 | `agent.started` / `agent.completed` / `agent.failed` | agents | info / info / medium | `task_id`, + `simulated: true` pour l'agent de démonstration |
+| `action.proposed` / `action.approved` / `action.executed` | file d'approbation | medium (L2) ou high (L3) / info | `action_id`, `tool`, `risk_level`, `required_role` (jamais les paramètres) |
+| `action.rejected` / `action.expired` | file d'approbation | info / low | idem |
+| `action.failed` | exécution échouée ou intégrité compromise | medium / critical | idem |
+| `action.refused` | outil interdit (L4) ou inconnu | medium | `tool`, `risk_level`, `known` |
 
 Non implémentés (prévus) : `resource.cpu`, `resource.memory`, `security.alert`.
 

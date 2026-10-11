@@ -3,11 +3,12 @@ import type { StreamStatus } from "../hooks/useEventStream";
 import type { Me } from "../types/api";
 import { Badge, StatusDot } from "./ui";
 
-export type Page = "overview" | "agents" | "providers";
-const NAV: { id: Page; label: string }[] = [
+export type Page = "overview" | "agents" | "providers" | "approvals";
+const NAV: { id: Page; label: string; analystOnly?: boolean }[] = [
   { id: "overview", label: "Overview" },
   { id: "agents", label: "Agents" },
   { id: "providers", label: "Providers" },
+  { id: "approvals", label: "Approvals", analystOnly: true },
 ];
 const STREAM_LABEL: Record<StreamStatus, string> = {
   connecting: "connexion…", open: "temps réel", reconnecting: "reconnexion…", unauthorized: "session expirée",
@@ -17,11 +18,12 @@ interface Props {
   page: Page;
   me: Me;
   stream: StreamStatus;
+  pending: number;
   onLogout: () => void;
   children: ReactNode;
 }
 
-export function Layout({ page, me, stream, onLogout, children }: Props) {
+export function Layout({ page, me, stream, pending, onLogout, children }: Props) {
   return (
     <div className="cb-layout">
       <aside className="cb-sidebar">
@@ -29,10 +31,13 @@ export function Layout({ page, me, stream, onLogout, children }: Props) {
           <span className="cb-brand-name">Cyber<span>AI</span></span>
         </div>
         <nav aria-label="Navigation principale">
-          {NAV.map((n) => (
+          {NAV.filter((n) => !n.analystOnly || me.role !== "viewer").map((n) => (
             <a key={n.id} href={`#/${n.id}`} className={n.id === page ? "cb-nav-link active" : "cb-nav-link"}
                aria-current={n.id === page ? "page" : undefined}>
               {n.label}
+              {n.id === "approvals" && pending > 0 ? (
+                <span className="cb-nav-badge" aria-label={`${pending} en attente`}>{pending}</span>
+              ) : null}
             </a>
           ))}
         </nav>
