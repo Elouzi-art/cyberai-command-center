@@ -101,3 +101,8 @@
 .cb-notice { border: 1px solid var(--bg-border); border-left: 3px solid var(--accent); border-radius: var(--r-md);
   background: var(--bg-surface); padding: 10px 14px; font-size: 13px; margin-bottom: 12px; }
 .cb-action { border-left: 3px solid var(--orange); }
+.cb-break { word-break: break-all; }
+.cb-bar { display: inline-block; width: 60px; height: 6px; background: var(--bg-elevated); border-radius: 3px;
+  overflow: hidden; vertical-align: middle; }
+.cb-bar-fill { display: block; height: 100%; background: var(--accent); }
+.cb-bar-fill.is-red { background: var(--red); }

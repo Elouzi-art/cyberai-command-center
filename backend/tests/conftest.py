@@ -28,13 +28,19 @@ class FakeProvider(AIProvider):
 
 
 @pytest.fixture
-def make_client() -> Iterator[Callable[..., TestClient]]:
+def make_client(tmp_path: Path) -> Iterator[Callable[..., TestClient]]:
     clients: list[TestClient] = []
 
     def _make(providers: dict[str, AIProvider] | None = None, **overrides: object) -> TestClient:
-        settings = Settings(
-            database_url="sqlite://", cookie_secure=False, policy_path=POLICY, **overrides
-        )  # type: ignore[arg-type]
+        # Un dossier temporaire PAR test : aucun état partagé, rien écrit dans le dépôt.
+        base: dict[str, object] = {
+            "database_url": "sqlite://",
+            "cookie_secure": False,
+            "policy_path": POLICY,
+            "inbox_dir": str(tmp_path / "inbox"),
+            "outbox_dir": str(tmp_path / "outbox"),
+        }
+        settings = Settings(**{**base, **overrides})  # type: ignore[arg-type]
         client = TestClient(create_app(settings, providers if providers is not None else {}))
         client.__enter__()
         clients.append(client)

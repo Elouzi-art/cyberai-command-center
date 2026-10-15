@@ -14,6 +14,9 @@ Les `data` ne contiennent jamais de prompt, de secret ni de contenu de fichier. 
 | `action.rejected` / `action.expired` | file d'approbation | info / low | idem |
 | `action.failed` | exécution échouée ou intégrité compromise | medium / critical | idem |
 | `action.refused` | outil interdit (L4) ou inconnu | medium | `tool`, `risk_level`, `known` |
+| `sample.uploaded` | dépôt d'un fichier | info | `sample_id`, `sha256`, `size` (jamais le nom de fichier) |
+| `sample.analyzed` | résultat intégré | info | `sample_id`, `sha256`, `file_type`, `rule_hits` |
+| `sample.failed` | analyse en échec ou résultat rejeté | medium | `sample_id`, `sha256`, `error` (code) |
 
 Non implémentés (prévus) : `resource.cpu`, `resource.memory`, `security.alert`.
 

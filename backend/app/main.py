@@ -20,7 +20,7 @@ from app.monitor import QuotaAlertState
 from app.policy import Policy
 from app.providers import AIProvider
 from app.providers.registry import load_providers
-from app.routes import actions, agents, auth, events, providers, usage
+from app.routes import actions, agents, auth, events, providers, samples, usage
 
 log = logging.getLogger(__name__)
 
@@ -37,6 +37,8 @@ def create_app(
             os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
         engine = make_engine(cfg.database_url)
         init_db(engine)
+        for d in (cfg.inbox_dir, cfg.outbox_dir):
+            os.makedirs(d, mode=0o700, exist_ok=True)
         app.state.policy = Policy.load(
             cfg.policy_path
         )  # échec fermé : pas de politique, pas de démarrage
@@ -56,7 +58,7 @@ def create_app(
 
     app = FastAPI(
         title="CyberAI Command Center",
-        version="0.4.0",
+        version="0.5.0",
         docs_url=None,
         redoc_url=None,
         lifespan=lifespan,
@@ -82,6 +84,7 @@ def create_app(
     app.include_router(agents.router)
     app.include_router(events.router)
     app.include_router(actions.router)
+    app.include_router(samples.router)
     return app
 
 

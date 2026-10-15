@@ -6,11 +6,35 @@ services:
       - "./config.example.yaml:/app/config.yaml:ro"
       - "./policy:/app/policy:ro"
       - "appdata:/data"
+      - "inbox:/inbox"      # le backend dépose les échantillons
+      - "outbox:/outbox"    # et relit les résultats (entrée NON fiable)
+    environment:
+      INBOX_DIR: /inbox
+      OUTBOX_DIR: /outbox
+      MAX_UPLOAD_BYTES: "${MAX_UPLOAD_BYTES:-20971520}"
     tmpfs: ["/tmp"]
     read_only: true
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]
     expose: ["8000"]
+  analyzer:                # lit des fichiers HOSTILES : isolé, sans réseau, sans secret
+    build: ./analyzer
+    network_mode: none
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    user: "10001"
+    mem_limit: 1g
+    pids_limit: 128
+    tmpfs: ["/tmp"]
+    environment:
+      INBOX_DIR: /inbox
+      OUTBOX_DIR: /outbox
+      MAX_UPLOAD_BYTES: "${MAX_UPLOAD_BYTES:-20971520}"
+      ANALYSIS_TIMEOUT: "30"
+    volumes:
+      - "inbox:/inbox:ro"   # lecture seule : l'analyseur ne peut pas altérer les échantillons
+      - "outbox:/outbox"
   frontend:
     build: ./frontend
     ports: ["8080:8080"]   # exposer sur 127.0.0.1 en production derrière un reverse proxy TLS
@@ -21,4 +45,6 @@ services:
     volumes: ["ollama:/root/.ollama"]
 volumes:
   appdata:
+  inbox:
+  outbox:
   ollama:

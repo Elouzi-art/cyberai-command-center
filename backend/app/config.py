@@ -24,6 +24,10 @@ class Settings:
     policy_path: str = "policy/tools.yaml"
     approval_ttl_minutes: int = 60
     allow_self_approval: bool = False
+    inbox_dir: str = "data/inbox"
+    outbox_dir: str = "data/outbox"
+    max_upload_bytes: int = 20 * 1024 * 1024
+    max_queued_samples: int = 20
     demo_step_delay: float = 0.5
 
     @classmethod
@@ -39,4 +43,8 @@ class Settings:
             policy_path=e.get("POLICY_PATH", cls.policy_path),
             approval_ttl_minutes=int(e.get("APPROVAL_TTL_MINUTES", cls.approval_ttl_minutes)),
             allow_self_approval=e.get("ALLOW_SELF_APPROVAL", "false").lower() == "true",
+            inbox_dir=e.get("INBOX_DIR", cls.inbox_dir),
+            outbox_dir=e.get("OUTBOX_DIR", cls.outbox_dir),
+            max_upload_bytes=int(e.get("MAX_UPLOAD_BYTES", cls.max_upload_bytes)),
+            max_queued_samples=int(e.get("MAX_QUEUED_SAMPLES", cls.max_queued_samples)),
         )

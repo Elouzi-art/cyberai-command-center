@@ -4,26 +4,253 @@
   "title": "AnalysisReport v1 (R4 : provenance obligatoire)",
   "type": "object",
   "additionalProperties": false,
-  "required": ["subject", "agent", "generated_at", "items", "needs_human_review"],
+  "required": [
+    "subject",
+    "agent",
+    "generated_at",
+    "items",
+    "needs_human_review"
+  ],
   "properties": {
-    "subject": { "type": "string" },
-    "agent": { "type": "string" },
-    "generated_at": { "type": "string", "format": "date-time" },
-    "needs_human_review": { "type": "boolean" },
+    "subject": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f\\u200b-\\u200f\\u2028-\\u202e\\u2066-\\u2069]*$"
+    },
+    "agent": {
+      "type": "string"
+    },
+    "generated_at": {
+      "type": "string",
+      "maxLength": 32
+    },
+    "needs_human_review": {
+      "type": "boolean"
+    },
     "items": {
       "type": "array",
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["provenance", "statement", "confidence"],
+        "required": [
+          "provenance",
+          "statement",
+          "confidence"
+        ],
         "properties": {
-          "provenance": { "enum": ["tool_data", "ml_result", "ai_observation", "hypothesis"] },
-          "statement": { "type": "string" },
-          "confidence": { "type": ["number", "null"], "minimum": 0, "maximum": 1 },
-          "evidence": { "type": "array", "items": { "type": "string" } },
-          "source": { "type": "string" },
-          "collected_at": { "type": "string", "format": "date-time" }
+          "provenance": {
+            "enum": [
+              "tool_data",
+              "ml_result",
+              "ai_observation",
+              "hypothesis"
+            ]
+          },
+          "statement": {
+            "type": "string",
+            "maxLength": 300,
+            "pattern": "^[^\\u0000-\\u001f\\u007f-\\u009f\\u200b-\\u200f\\u2028-\\u202e\\u2066-\\u2069]*$"
+          },
+          "confidence": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 1
+          },
+          "evidence": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "string",
+              "maxLength": 64,
+              "pattern": "^[\\u0020-\\u007e]*$"
+            }
+          },
+          "source": {
+            "type": "string",
+            "maxLength": 32,
+            "pattern": "^[\\u0020-\\u007e]*$"
+          },
+          "collected_at": {
+            "type": "string",
+            "format": "date-time"
+          }
         }
+      },
+      "maxItems": 200
+    },
+    "sample": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sha256",
+        "md5",
+        "sha1",
+        "size",
+        "file_type",
+        "entropy"
+      ],
+      "properties": {
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "md5": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        },
+        "sha1": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "file_type": {
+          "enum": [
+            "PE",
+            "PE (invalide)",
+            "ELF",
+            "ZIP",
+            "PDF",
+            "OLE",
+            "inconnu"
+          ]
+        },
+        "entropy": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 8
+        }
+      }
+    },
+    "pe": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "machine",
+        "subsystem",
+        "timestamp",
+        "sections",
+        "imports_dlls",
+        "imports_count",
+        "overlay_size",
+        "signed",
+        "entry_section"
+      ],
+      "properties": {
+        "machine": {
+          "type": "string",
+          "maxLength": 32,
+          "pattern": "^[\\u0020-\\u007e]*$"
+        },
+        "subsystem": {
+          "type": "string",
+          "maxLength": 32,
+          "pattern": "^[\\u0020-\\u007e]*$"
+        },
+        "timestamp": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 32
+        },
+        "sections": {
+          "type": "array",
+          "maxItems": 96,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "name",
+              "virtual_size",
+              "raw_size",
+              "entropy",
+              "flags"
+            ],
+            "properties": {
+              "name": {
+                "type": "string",
+                "maxLength": 16,
+                "pattern": "^[\\u0020-\\u007e]*$"
+              },
+              "virtual_size": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "raw_size": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "entropy": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 8
+              },
+              "flags": {
+                "type": "array",
+                "maxItems": 3,
+                "items": {
+                  "enum": [
+                    "read",
+                    "write",
+                    "exec"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "imports_dlls": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "string",
+            "maxLength": 64,
+            "pattern": "^[\\u0020-\\u007e]*$"
+          }
+        },
+        "imports_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "overlay_size": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "signed": {
+          "type": "boolean"
+        },
+        "entry_section": {
+          "anyOf": [
+            {
+              "type": "string",
+              "maxLength": 16,
+              "pattern": "^[\\u0020-\\u007e]*$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "tool_versions": {
+      "type": "object",
+      "maxProperties": 8,
+      "propertyNames": {
+        "type": "string",
+        "maxLength": 32,
+        "pattern": "^[\\u0020-\\u007e]*$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "maxLength": 32,
+        "pattern": "^[\\u0020-\\u007e]*$"
       }
     }
   }

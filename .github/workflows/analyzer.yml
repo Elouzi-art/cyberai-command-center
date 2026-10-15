@@ -1,0 +1,24 @@
+name: Analyzer
+on:
+  pull_request:
+    paths: ["analyzer/**", "schemas/**", ".github/workflows/analyzer.yml"]
+  push:
+    branches: [main]
+    paths: ["analyzer/**", "schemas/**", ".github/workflows/analyzer.yml"]
+permissions: { contents: read }
+concurrency: { group: "analyzer-${{ github.ref }}", cancel-in-progress: true }
+
+jobs:
+  analyzer:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: analyzer } }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip, cache-dependency-path: analyzer/pyproject.toml }
+      - run: pip install -e ".[dev]"
+      - run: ruff check . && ruff format --check .
+      - run: mypy cyberai_analyzer
+      - run: pytest          # PE synthétiques uniquement : aucun échantillon réel dans le dépôt
+      - run: pip-audit
+      - run: docker build .

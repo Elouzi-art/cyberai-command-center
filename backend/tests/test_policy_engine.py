@@ -89,7 +89,13 @@ def test_missing_and_invalid_files_fail_closed(tmp_path: Path) -> None:
 
 
 def test_app_refuses_to_start_without_policy(tmp_path: Path) -> None:
-    app = create_app(Settings(database_url="sqlite://", policy_path=str(tmp_path / "x.yaml")), {})
+    cfg = Settings(
+        database_url="sqlite://",
+        policy_path=str(tmp_path / "x.yaml"),
+        inbox_dir=str(tmp_path / "i"),
+        outbox_dir=str(tmp_path / "o"),
+    )
+    app = create_app(cfg, {})
     with pytest.raises(PolicyError), TestClient(app):
         pass
 
