@@ -51,6 +51,12 @@ export function describeEvent(type: string, data: Record<string, unknown>): stri
     case "action.failed":
     case "action.refused":
       return `${str(data["tool"])} · ${str(data["risk_level"])}`;
+    case "sample.uploaded":
+      return `${str(data["sha256"]).slice(0, 12)}… · ${formatBytes(Number(data["size"]))}`;
+    case "sample.analyzed":
+      return `${str(data["file_type"])} · ${str(data["rule_hits"])} règle(s)`;
+    case "sample.failed":
+      return `erreur ${str(data["error"])}`;
     case "agent.started":
     case "agent.completed":
     case "agent.failed":
@@ -58,4 +64,11 @@ export function describeEvent(type: string, data: Record<string, unknown>): stri
     default:
       return type;
   }
+}
+
+export function formatBytes(n: number): string {
+  if (!Number.isFinite(n) || n < 0) return "?";
+  if (n < 1024) return `${n} o`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} Ko`;
+  return `${(n / 1024 / 1024).toFixed(1)} Mo`;
 }

@@ -3,11 +3,12 @@ import type { StreamStatus } from "../hooks/useEventStream";
 import type { Me } from "../types/api";
 import { Badge, StatusDot } from "./ui";
 
-export type Page = "overview" | "agents" | "providers" | "approvals";
+export type Page = "overview" | "agents" | "providers" | "approvals" | "samples";
 const NAV: { id: Page; label: string; analystOnly?: boolean }[] = [
   { id: "overview", label: "Overview" },
   { id: "agents", label: "Agents" },
   { id: "providers", label: "Providers" },
+  { id: "samples", label: "Samples", analystOnly: true },
   { id: "approvals", label: "Approvals", analystOnly: true },
 ];
 const STREAM_LABEL: Record<StreamStatus, string> = {

@@ -98,3 +98,57 @@ export interface Action {
   result: Record<string, unknown> | null;
   dry_run_result?: Record<string, unknown>;
 }
+
+export type SampleStatus = "queued" | "analyzed" | "failed";
+export interface SampleSummary {
+  id: string;
+  name: string;
+  sha256: string;
+  size: number;
+  status: SampleStatus;
+  error: string | null;
+  file_type: string | null;
+  rule_hits: number | null;
+  created_at: string;
+  uploaded_by: string;
+  ingested_at: string | null;
+}
+export type Provenance = "tool_data" | "ml_result" | "ai_observation" | "hypothesis";
+export interface ReportItem {
+  provenance: Provenance;
+  statement: string;
+  confidence: number | null;
+  evidence: string[];
+  source: string;
+}
+export interface ReportSection {
+  name: string;
+  virtual_size: number;
+  raw_size: number;
+  entropy: number;
+  flags: ("read" | "write" | "exec")[];
+}
+/** schemas/analysis_report.v1.json (rapport de l'agent Malware) */
+export interface MalwareReport {
+  subject: string;
+  agent: "malware";
+  generated_at: string;
+  needs_human_review: boolean;
+  sample: { sha256: string; md5: string; sha1: string; size: number; file_type: string; entropy: number };
+  pe?: {
+    machine: string;
+    subsystem: string;
+    timestamp: string | null;
+    sections: ReportSection[];
+    imports_dlls: string[];
+    imports_count: number;
+    overlay_size: number;
+    signed: boolean;
+    entry_section: string | null;
+  };
+  items: ReportItem[];
+  tool_versions: Record<string, string>;
+}
+export interface SampleDetail extends SampleSummary {
+  report: MalwareReport | null;
+}

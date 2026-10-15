@@ -8,9 +8,10 @@ import { Approvals } from "./pages/Approvals";
 import { Login } from "./pages/Login";
 import { Overview } from "./pages/Overview";
 import { Providers } from "./pages/Providers";
+import { Samples } from "./pages/Samples";
 import type { Action, Me } from "./types/api";
 
-const PAGES: Page[] = ["overview", "agents", "providers", "approvals"];
+const PAGES: Page[] = ["overview", "agents", "providers", "approvals", "samples"];
 
 function usePage(): Page {
   const read = (): Page => {
@@ -36,7 +37,9 @@ function usePendingCount(role: Me["role"], onUnauthorized: () => void): number {
 function Authed({ me, onLoggedOut }: { me: Me; onLoggedOut: () => void }) {
   const requested = usePage();
   // Un viewer n'a pas accès à la file d'approbation : retour à l'overview plutôt qu'une page vide.
-  const page: Page = requested === "approvals" && me.role === "viewer" ? "overview" : requested;
+  const page: Page = (requested === "approvals" || requested === "samples") && me.role === "viewer"
+      ? "overview"
+      : requested;
   const { events, status } = useEventStream(onLoggedOut);
   const pending = usePendingCount(me.role, onLoggedOut);
 
@@ -50,6 +53,7 @@ function Authed({ me, onLoggedOut }: { me: Me; onLoggedOut: () => void }) {
       {page === "overview" && <Overview events={events} onUnauthorized={onLoggedOut} />}
       {page === "agents" && <Agents me={me} onUnauthorized={onLoggedOut} />}
       {page === "providers" && <Providers onUnauthorized={onLoggedOut} />}
+      {page === "samples" && me.role !== "viewer" && <Samples me={me} onUnauthorized={onLoggedOut} />}
       {page === "approvals" && me.role !== "viewer" && <Approvals me={me} onUnauthorized={onLoggedOut} />}
     </Layout>
   );

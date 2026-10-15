@@ -15,7 +15,7 @@ S4 ✅ moteur de politique + file d'approbation + exécuteur factice + page Appr
 Moteur de politique (L0–L4), file d'approbation (hash des paramètres, expiration), exécuteur séparé (stub), audit log, page Approvals.
 
 ## Phase 3 — Malware (S6–S8) · R4 R6 R7
-S6 upload sécurisé + quarantaine + conteneur sans réseau · S7 adapters pefile/ssdeep/TLSH/YARA/capa/FLOSS · S8 synthèse LLM étiquetée + VirusTotal (hash seul, L1).
+S6 ✅ upload sécurisé + quarantaine + conteneur sans réseau + analyse statique PE de base (hachages, entropie, sections, imports, règles) · S7 adapters pefile/ssdeep/TLSH/YARA/capa/FLOSS · S8 synthèse LLM étiquetée + VirusTotal (hash seul, L1).
 Reporté : clustering HDBSCAN, classifieur EMBER.
 
 ## Phase 4 — Forensics (S9–S11) · R4 R6

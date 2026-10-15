@@ -44,6 +44,7 @@ const base = (role: string): Routes => ({
   "/usage/tokens": () => json(usage),
   "/auth/logout": () => json({ status: "ok" }),
   "/actions": () => json([]),
+  "/samples": () => json([]),
 });
 
 beforeEach(() => {
@@ -158,4 +159,22 @@ test("un viewer n'a ni l'onglet Approvals ni accès à la file", async () => {
   expect(screen.queryByRole("link", { name: /Approvals/ })).toBeNull();
   const calls = (fetch as unknown as { mock: { calls: string[][] } }).mock.calls.map((c) => c[0] ?? "");
   expect(calls.some((u) => u.includes("/actions"))).toBe(false);
+});
+
+test("un viewer n'a pas l'onglet Samples et n'appelle pas l'API des échantillons", async () => {
+  window.location.hash = "#/samples";
+  stub(base("viewer"));
+  render(<App />);
+  await screen.findByText("Agents actifs");
+  expect(screen.queryByRole("link", { name: "Samples" })).toBeNull();
+  const urls = (fetch as unknown as { mock: { calls: string[][] } }).mock.calls.map((c) => c[0] ?? "");
+  expect(urls.some((x) => x.includes("/samples"))).toBe(false);
+});
+
+test("un analyste voit l'onglet Samples", async () => {
+  window.location.hash = "#/samples";
+  stub(base("analyst"));
+  render(<App />);
+  expect(await screen.findByText("Déposer un fichier à analyser")).toBeTruthy();
+  expect(screen.getByRole("link", { name: "Samples" })).toBeTruthy();
 });

@@ -1,4 +1,4 @@
-import { describeEvent, formatDuration, metricNumber } from "./format";
+import { describeEvent, formatBytes, formatDuration, metricNumber } from "./format";
 
 test("formatDuration", () => {
   expect(formatDuration(0)).toBe("0s");
@@ -34,4 +34,16 @@ test("describeEvent tolère des données inattendues sans planter", () => {
 test("describeEvent : événements d'action sans exposer les paramètres", () => {
   const txt = describeEvent("action.proposed", { tool: "net.scan", risk_level: "L2", params: { secret: "x" } });
   expect(txt).toBe("net.scan · L2");
+});
+
+test("formatBytes", () => {
+  expect(formatBytes(512)).toBe("512 o");
+  expect(formatBytes(2048)).toBe("2.0 Ko");
+  expect(formatBytes(5 * 1024 * 1024)).toBe("5.0 Mo");
+  expect(formatBytes(-1)).toBe("?");
+});
+
+test("describeEvent : événements d'échantillon sans nom de fichier", () => {
+  expect(describeEvent("sample.analyzed", { file_type: "PE", rule_hits: 3, name: "secret.exe" })).toBe("PE · 3 règle(s)");
+  expect(describeEvent("sample.failed", { error: "timeout" })).toBe("erreur timeout");
 });

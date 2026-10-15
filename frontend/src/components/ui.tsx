@@ -14,7 +14,7 @@ export function Value({ metric, unit, fmt }: { metric: MetricValue; unit?: strin
   return <>{unit ? `${v} ${unit}` : v}</>;
 }
 
-export const Badge = ({ tone, children }: { tone: "green" | "blue" | "orange" | "red" | "muted"; children: ReactNode }) => (
+export const Badge = ({ tone, children }: { tone: "green" | "blue" | "orange" | "red" | "purple" | "muted"; children: ReactNode }) => (
   <span className={`cb-badge cb-badge-${tone}`}>{children}</span>
 );
 

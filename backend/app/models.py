@@ -81,3 +81,21 @@ class Action(Base):
     decided_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     executed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     result_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
+class Sample(Base):
+    """Échantillon déposé en quarantaine. Jamais exécuté, jamais servi en téléchargement."""
+
+    __tablename__ = "samples"
+    id: Mapped[str] = mapped_column(String(32), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=utcnow, index=True)
+    uploaded_by: Mapped[str] = mapped_column(String(64))
+    name: Mapped[str] = mapped_column(String(128))  # métadonnée assainie, jamais un chemin disque
+    sha256: Mapped[str] = mapped_column(String(64), index=True)
+    size: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(16), index=True)  # queued | analyzed | failed
+    error: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    file_type: Mapped[str | None] = mapped_column(String(16), nullable=True)
+    rule_hits: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    report_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    ingested_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)

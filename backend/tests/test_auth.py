@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from pathlib import Path
 
 from fastapi.testclient import TestClient
 
@@ -16,8 +17,14 @@ def test_login_ok_sets_hardened_cookie(make_client: Callable[..., TestClient]) -
     assert c.get("/auth/me").json()["username"] == "ana"
 
 
-def test_secure_flag_by_default() -> None:
-    with TestClient(create_app(Settings(database_url="sqlite://", policy_path=POLICY))) as c:
+def test_secure_flag_by_default(tmp_path: Path) -> None:
+    cfg = Settings(
+        database_url="sqlite://",
+        policy_path=POLICY,
+        inbox_dir=str(tmp_path / "i"),
+        outbox_dir=str(tmp_path / "o"),
+    )
+    with TestClient(create_app(cfg)) as c:
         with c.app.state.session_factory() as db:  # type: ignore[attr-defined]
             from app.models import User
             from app.security import hash_password

@@ -54,3 +54,10 @@ Décisions : `docs/adr/`.
 | `POST /actions/{id}/approve` | selon le niveau (analyst L2, admin L3) | approuve le hash vu ; `dry_run` possible |
 | `POST /actions/{id}/reject` | analyst | rejette |
 | `POST /agents/demo/propose` | analyst | l'agent de démonstration propose une action (si activé) |
+
+## API (Sprint 6) : voir docs/MALWARE.md
+| Route | Rôle min. | Rôle |
+|---|---|---|
+| `POST /samples?filename=` | analyst | dépôt (corps brut `application/octet-stream`, lu en flux, taille limitée) |
+| `GET /samples`, `GET /samples/{id}` | analyst | liste ; détail avec rapport |
+| `DELETE /samples/{id}` | admin | supprime l'échantillon, son résultat et la ligne en base |
