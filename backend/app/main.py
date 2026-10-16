@@ -6,8 +6,9 @@ import os
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
-from fastapi.responses import PlainTextResponse
+from fastapi import FastAPI, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse, PlainTextResponse
 from prometheus_client import CONTENT_TYPE_LATEST, generate_latest
 
 from app.agents.demo import AGENT_ID, AgentState
@@ -69,6 +70,19 @@ def create_app(
     app.state.quota_alerts = QuotaAlertState()
     app.state.demo_state = AgentState(AGENT_ID)
     app.state.tasks = set[asyncio.Task[None]]()
+
+    @app.exception_handler(RequestValidationError)
+    async def _validation_error(_request: Request, exc: RequestValidationError) -> JSONResponse:
+        """422 sans écho : jamais la valeur saisie, seulement le champ et le motif."""
+        errors = [
+            {
+                "loc": list(e.get("loc", ())),
+                "msg": str(e.get("msg", "")),
+                "type": str(e.get("type", "")),
+            }
+            for e in exc.errors()
+        ]
+        return JSONResponse(status_code=422, content={"detail": errors})
 
     @app.get("/health")
     def health() -> dict[str, str]:

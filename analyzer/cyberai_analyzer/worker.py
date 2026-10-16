@@ -10,17 +10,23 @@ from __future__ import annotations
 
 import hashlib
 import json
+import logging
 import os
 import re
+import signal
 import stat
+import threading
 import time
 from pathlib import Path
+from types import FrameType
 from typing import Any
 
 from cyberai_analyzer.core import analyze
 from cyberai_analyzer.isolation import run_with_limits
 
+log = logging.getLogger("cyberai_analyzer")
 ID_RE = re.compile(r"^smp_[0-9a-f]{16}$")
+OUTCOME_RE = re.compile(r"^[a-z_]{1,32}$")
 MAX_JOB_BYTES = 4096
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
 
@@ -49,9 +55,12 @@ def _write_result(outbox: Path, sample_id: str, payload: dict[str, Any]) -> None
     )  # atomique : le backend ne voit jamais un demi-fichier
 
 
-def process_job(inbox: Path, outbox: Path, sample_id: str, max_bytes: int, timeout: float) -> None:
-    def fail(code: str) -> None:
+def process_job(inbox: Path, outbox: Path, sample_id: str, max_bytes: int, timeout: float) -> str:
+    """Traite un échantillon et renvoie un code court (\"ok\" ou le code d'erreur)."""
+
+    def fail(code: str) -> str:
         _write_result(outbox, sample_id, {"ok": False, "error": code})
+        return code
 
     raw_job = _read_regular(inbox / sample_id / "job.json", MAX_JOB_BYTES)
     try:
@@ -74,7 +83,11 @@ def process_job(inbox: Path, outbox: Path, sample_id: str, max_bytes: int, timeo
         return fail("size_mismatch")
     if hashlib.sha256(data).hexdigest() != job["sha256"]:
         return fail("hash_mismatch")
-    _write_result(outbox, sample_id, run_with_limits(analyze, (data, sample_id), timeout))
+    result = run_with_limits(analyze, (data, sample_id), timeout)
+    _write_result(outbox, sample_id, result)
+    outcome = "ok" if result.get("ok") is True else str(result.get("error", "unknown"))
+    # Ce code vient d'un processus qui a lu un fichier hostile : journalisé seulement s'il est sûr.
+    return outcome if OUTCOME_RE.match(outcome) else "invalid_outcome"
 
 
 def pending(inbox: Path, outbox: Path) -> list[str]:
@@ -88,20 +101,51 @@ def pending(inbox: Path, outbox: Path) -> list[str]:
     return [i for _, i in sorted(ids)]
 
 
-def run_once(inbox: Path, outbox: Path, max_bytes: int, timeout: float) -> int:
+def run_once(
+    inbox: Path, outbox: Path, max_bytes: int, timeout: float, stop: threading.Event | None = None
+) -> int:
     done = 0
     for sample_id in pending(inbox, outbox):
+        if stop is not None and stop.is_set():
+            break  # arrêt demandé : les travaux restants seront repris au prochain démarrage
+        start = time.monotonic()
         try:
-            process_job(inbox, outbox, sample_id, max_bytes, timeout)
+            outcome = process_job(inbox, outbox, sample_id, max_bytes, timeout)
         except Exception:  # noqa: BLE001 - un échec ne doit jamais arrêter la boucle
             _write_result(outbox, sample_id, {"ok": False, "error": "worker_error"})
+            outcome = "worker_error"
+        # Journal : identifiant et code seulement, jamais de contenu ni de nom de fichier.
+        log.info("job %s -> %s (%d ms)", sample_id, outcome, (time.monotonic() - start) * 1000)
         done += 1
     return done
 
 
 def serve_forever(
-    inbox: Path, outbox: Path, max_bytes: int, timeout: float, poll: float = 2.0
+    inbox: Path,
+    outbox: Path,
+    max_bytes: int,
+    timeout: float,
+    poll: float = 2.0,
+    stop: threading.Event | None = None,
 ) -> None:
-    while True:
-        run_once(inbox, outbox, max_bytes, timeout)
-        time.sleep(poll)
+    """Boucle principale. SIGTERM/SIGINT : termine le travail en cours puis s'arrête proprement.
+
+    Sans gestionnaire, le processus principal d'un conteneur ignore SIGTERM et Docker attend 10 s
+    avant de le tuer. Un travail interrompu n'a pas de résultat : il est repris au redémarrage.
+    """
+    stop = stop or threading.Event()
+
+    def _on_signal(signum: int, _frame: FrameType | None) -> None:
+        log.info("signal %d reçu : arrêt après le travail en cours", signum)
+        stop.set()
+
+    try:
+        signal.signal(signal.SIGTERM, _on_signal)
+        signal.signal(signal.SIGINT, _on_signal)
+    except ValueError:  # pas le thread principal (tests) : l'appelant gère `stop`
+        pass
+    log.info("analyseur démarré (délai %.0f s, taille max %d octets)", timeout, max_bytes)
+    while not stop.is_set():
+        run_once(inbox, outbox, max_bytes, timeout, stop)
+        stop.wait(poll)  # interrompu immédiatement par un signal
+    log.info("analyseur arrêté proprement")

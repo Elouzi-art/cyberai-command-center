@@ -61,3 +61,6 @@ Décisions : `docs/adr/`.
 | `POST /samples?filename=` | analyst | dépôt (corps brut `application/octet-stream`, lu en flux, taille limitée) |
 | `GET /samples`, `GET /samples/{id}` | analyst | liste ; détail avec rapport |
 | `DELETE /samples/{id}` | admin | supprime l'échantillon, son résultat et la ligne en base |
+
+## Conventions d'erreur
+Les erreurs de validation (422) ne renvoient que `loc`, `msg` et `type` : **jamais la valeur saisie** (mot de passe, contenu), que la validation par défaut de FastAPI renvoie en écho (`input`).

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import multiprocessing as mp
+import signal
 from collections.abc import Callable
 from multiprocessing.connection import Connection
 from typing import Any
@@ -23,6 +24,9 @@ MEMORY_LIMIT = 768 * 1024 * 1024
 
 def _child(conn: Connection, target: Callable[..., dict[str, Any]], args: tuple[Any, ...]) -> None:
     try:
+        signal.signal(
+            signal.SIGTERM, signal.SIG_DFL
+        )  # l'enfant ne doit pas hériter du gestionnaire du parent
         if resource is not None:
             resource.setrlimit(resource.RLIMIT_AS, (MEMORY_LIMIT, MEMORY_LIMIT))
         payload: dict[str, Any] = {"ok": True, "report": target(*args)}
