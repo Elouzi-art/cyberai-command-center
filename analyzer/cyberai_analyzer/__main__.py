@@ -1,9 +1,14 @@
+import logging
 import os
+import sys
 from pathlib import Path
 
 from cyberai_analyzer.worker import serve_forever
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        level=logging.INFO, stream=sys.stdout, format="%(asctime)s %(levelname)s %(message)s"
+    )
     serve_forever(
         Path(os.environ.get("INBOX_DIR", "/inbox")),
         Path(os.environ.get("OUTBOX_DIR", "/outbox")),
